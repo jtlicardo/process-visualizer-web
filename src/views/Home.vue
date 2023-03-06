@@ -1,7 +1,7 @@
 <template>
-  <HelloWorld />
+  <ProcessDescription />
 </template>
 
 <script setup>
-  import HelloWorld from '@/components/HelloWorld.vue'
+import ProcessDescription from "@/components/ProcessDescription.vue";
 </script>
