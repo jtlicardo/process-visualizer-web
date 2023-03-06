@@ -8,10 +8,10 @@
         v-model="processDescription"
       ></v-textarea>
       <v-btn
-        :loading="loading[1]"
-        :disabled="loading[1]"
+        :loading="loading"
+        :disabled="loading"
         color="blue-lighten-5"
-        @click="load(1)"
+        @click="sendProcessDescription"
       >
         Submit
       </v-btn>
@@ -20,17 +20,35 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   data() {
     return {
-      loading: [],
+      loading: false,
       processDescription: "",
     };
   },
   methods: {
-    load(i) {
-      this.loading[i] = true;
-      setTimeout(() => (this.loading[i] = false), 3000);
+    sendProcessDescription() {
+      this.loading = true;
+      const path = "http://localhost:5000/text";
+      const data = {
+        text: this.processDescription,
+      };
+      axios
+        .post(path, JSON.stringify(data), {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+        .then((response) => {
+          console.log(response);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+      this.loading = false;
     },
   },
 };
