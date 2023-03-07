@@ -10,44 +10,64 @@
       <v-btn
         :loading="loading"
         :disabled="loading"
-        color="blue-lighten-5"
+        color="grey-lighten-4"
         @click="sendProcessDescription"
       >
         Submit
       </v-btn>
+      <div v-if="imageUrl">
+        <v-img
+          :src="imageUrl"
+          :width="imageWidth"
+          class="my-14 mx-auto"
+        ></v-img>
+      </div>
     </v-responsive>
   </v-container>
 </template>
 
 <script>
 import axios from "axios";
+import { supabase } from "../supabase";
 
 export default {
   data() {
     return {
       loading: false,
+      imageUrl: null,
+      imageWidth: 0,
       processDescription: "",
     };
   },
   methods: {
-    sendProcessDescription() {
+    async sendProcessDescription() {
+      this.imageUrl = null;
+      this.imageWidth = 0;
       this.loading = true;
       const path = "http://localhost:5000/text";
-      const data = {
+      let postData = {
         text: this.processDescription,
       };
-      axios
-        .post(path, JSON.stringify(data), {
+      try {
+        let response = await axios.post(path, JSON.stringify(postData), {
           headers: {
             "Content-Type": "application/json",
           },
-        })
-        .then((response) => {
-          console.log(response);
-        })
-        .catch((error) => {
-          console.log(error);
         });
+        let id = response.data.id;
+        const { data } = supabase.storage
+          .from("image-bucket")
+          .getPublicUrl(`bpmn/${id}.jpeg`);
+        this.imageUrl = data.publicUrl;
+        // Check image width
+        const img = new Image();
+        img.src = this.imageUrl;
+        img.onload = () => {
+          this.imageWidth = img.naturalWidth;
+        };
+      } catch (e) {
+        console.log(e);
+      }
       this.loading = false;
     },
   },
