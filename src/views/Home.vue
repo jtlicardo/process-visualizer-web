@@ -1,7 +1,7 @@
 <template>
-  <ProcessDescription />
+  <ProcessVisualizer />
 </template>
 
 <script setup>
-import ProcessDescription from "@/components/ProcessDescription.vue";
+import ProcessVisualizer from "@/components/ProcessVisualizer.vue";
 </script>
