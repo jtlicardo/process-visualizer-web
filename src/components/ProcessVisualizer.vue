@@ -64,13 +64,13 @@ export default {
           "to check in with an exam administrator. Once inside the exam room, the student will take the exam. Once the exam " +
           "time is up, the student will need to submit their completed exam. He will then be allowed to leave the exam room. " +
           "After the exam, the professor will grade the exams. The students will receive their exam results at a later date.";
-      }
-      else if (num === 3) {
-        this.processDescription = "The process begins with the student choosing his preferences. The professor then saves " + 
-        "the preferences to a database. He then allocates the student. After that, he informs the employer and the student " + 
-        "about the allocation. The employer evaluates the candidate. If the student is not accepted, the employer informs the " + 
-        "student. Ater that the student chooses his preferences again. If the student is accepted, he completes the internship. " + 
-        "After the student has done that, the professor updates the database."
+      } else if (num === 3) {
+        this.processDescription =
+          "The process begins with the student choosing his preferences. The professor then saves " +
+          "the preferences to a database. He then allocates the student. After that, he informs the employer and the student " +
+          "about the allocation. The employer evaluates the candidate. If the student is not accepted, the employer informs the " +
+          "student. Ater that the student chooses his preferences again. If the student is accepted, he completes the internship. " +
+          "After the student has done that, the professor updates the database.";
       }
     },
     async sendProcessDescription() {
