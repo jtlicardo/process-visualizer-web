@@ -18,7 +18,7 @@
       </v-container>
     </v-form>
     <v-container>
-      <v-btn class="mb-4" color="black" @click="openForm">Submit key</v-btn>
+      <v-btn class="mb-4" color="black" @click="submit">Submit key</v-btn>
     </v-container>
   </div>
 </template>
@@ -29,6 +29,9 @@ export default {
     return {
       apiKey: "",
     };
+  },
+  methods: {
+    submit() {},
   },
 };
 </script>
