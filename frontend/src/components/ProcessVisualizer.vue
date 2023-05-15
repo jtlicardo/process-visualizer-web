@@ -38,7 +38,6 @@
 
 <script>
 import axios from "axios";
-import { supabase } from "../supabase";
 
 export default {
   data() {
@@ -76,32 +75,13 @@ export default {
     },
     async sendProcessDescription() {
       this.imageUrl = null;
-      this.imageWidth = 0;
       this.loading = true;
       const path = "http://localhost:5000/text";
       let postData = {
         text: this.processDescription,
       };
       try {
-        let response = await axios.post(path, JSON.stringify(postData), {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        let id = response.data.id;
-        const { data } = supabase.storage
-          .from("image-bucket")
-          .getPublicUrl(`bpmn/${id}.jpeg`);
-        this.imageUrl = data.publicUrl;
-        // Check image width
-        const img = new Image();
-        img.src = this.imageUrl;
-        img.onload = () => {
-          this.imageWidth = img.naturalWidth;
-        };
-      } catch (e) {
-        console.log(e);
-      }
+      } catch (e) {}
       this.loading = false;
     },
   },

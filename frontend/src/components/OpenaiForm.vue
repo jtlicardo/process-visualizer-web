@@ -1,10 +1,8 @@
 <template>
   <div class="background">
     <p class="mb-6">
-      To use this app, please provide your OpenAI API key. Your key will be used
-      exclusively for the intended purposes of this app. <br />
-      For security reasons, we recommend that you delete your API key as soon as
-      you are done using this app.
+      To use this app, please provide your <b>OpenAI API key</b>. <br />
+      Your key will be used exclusively for the intended purposes of this app.
     </p>
     <v-form v-model="valid">
       <v-container>
@@ -24,14 +22,32 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   data() {
     return {
       apiKey: "",
+      keyProvided: false,
     };
   },
   methods: {
-    submit() {},
+    async submit() {
+      try {
+        let response = await axios.post(
+          "http://localhost:5000/key",
+          JSON.stringify({ key: this.apiKey }),
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        console.log(response);
+      } catch (e) {
+        console.log(e);
+      }
+    },
   },
 };
 </script>

@@ -1,7 +1,3 @@
-# process-visualizer-frontend
-
-This web application sends requests to the Flask API implemented in `server.py` of the [process visualizer](https://github.com/jtlicardo/process-visualizer) project and displays the results.
-
 ## Project setup
 
 ```
