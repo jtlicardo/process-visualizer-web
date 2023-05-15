@@ -1,16 +1,17 @@
 <template>
   <v-container class="fill-height">
     <v-responsive class="d-flex align-center text-center fill-height">
-      <h1 class="my-10">Process visualizer</h1>
-      <v-btn class="mx-2 mb-4" color="grey-lighten-4" @click="loadExample(1)"
-        >Example #1</v-btn
-      >
-      <v-btn class="mx-2 mb-4" color="grey-lighten-4" @click="loadExample(2)"
-        >Example #2</v-btn
-      >
-      <v-btn class="mx-2 mb-4" color="grey-lighten-4" @click="loadExample(3)"
-        >Example #3</v-btn
-      >
+      <v-container>
+        <v-btn class="mx-2 mb-4" color="grey-lighten-4" @click="loadExample(1)"
+          >Example #1</v-btn
+        >
+        <v-btn class="mx-2 mb-4" color="grey-lighten-4" @click="loadExample(2)"
+          >Example #2</v-btn
+        >
+        <v-btn class="mx-2 mb-4" color="grey-lighten-4" @click="loadExample(3)"
+          >Example #3</v-btn
+        >
+      </v-container>
       <v-textarea
         label="Process description"
         variant="outlined"
