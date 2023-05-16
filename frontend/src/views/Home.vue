@@ -1,6 +1,10 @@
 <template>
+  <v-toolbar color="grey-lighten-4">
+    <v-toolbar-title class="flex text-center"
+      >PROCESS VISUALIZER</v-toolbar-title
+    >
+  </v-toolbar>
   <v-responsive class="d-flex align-center text-center fill-height">
-    <h1 class="my-10">Process visualizer</h1>
     <OpenaiForm />
     <ProcessVisualizer />
   </v-responsive>
