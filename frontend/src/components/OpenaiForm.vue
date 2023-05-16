@@ -26,6 +26,10 @@
       >
     </v-container>
   </div>
+  <v-container>
+    <p class="mb-2">OpenAI model to use</p>
+    <v-select label="Select" :items="availableModels"></v-select>
+  </v-container>
 </template>
 
 <script>
@@ -55,6 +59,7 @@ export default {
         );
         console.log(response);
         this.keyProvided = true;
+        this.availableModels = response.data.available_models;
         alert("Key submitted successfully");
       } catch (e) {
         if (e.response.status === 401) {
