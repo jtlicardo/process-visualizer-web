@@ -27,7 +27,11 @@
         Submit
       </v-btn>
       <div v-if="imageCreated">
-        <v-img :src="imageUrl" class="my-14 mx-auto"></v-img>
+        <v-img
+          :src="imageUrl"
+          :width="imageWidth"
+          class="my-14 mx-auto"
+        ></v-img>
       </div>
     </v-responsive>
   </v-container>
@@ -43,6 +47,7 @@ export default {
       loading: false,
       imageCreated: null,
       imageCreatedTimestamp: 0,
+      imageWidth: 0,
     };
   },
   computed: {
@@ -54,6 +59,11 @@ export default {
     onImageCreated() {
       this.imageCreated = true;
       this.imageCreatedTimestamp = Date.now();
+      const img = new Image();
+      img.src = this.imageUrl;
+      img.onload = () => {
+        this.imageWidth = img.width;
+      };
     },
     loadExample(num) {
       if (num === 1) {
