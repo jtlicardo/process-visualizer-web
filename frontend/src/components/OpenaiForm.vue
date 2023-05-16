@@ -1,5 +1,5 @@
 <template>
-  <div class="background">
+  <div class="background" v-if="!keyProvided">
     <p class="mb-6">
       To use this app, please provide your <b>OpenAI API key</b>. <br />
       Your key will be used exclusively for the intended purposes of this app.
@@ -44,6 +44,7 @@ export default {
           }
         );
         console.log(response);
+        this.keyProvided = true;
       } catch (e) {
         console.log(e);
       }
