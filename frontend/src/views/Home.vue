@@ -1,16 +1,33 @@
 <template>
-  <v-toolbar color="grey-lighten-4">
-    <v-toolbar-title class="flex text-center"
-      >PROCESS VISUALIZER</v-toolbar-title
+  <v-app-bar color="grey-lighten-4" :elevation="2">
+    <v-app-bar-title class="flex text-center"
+      >PROCESS VISUALIZER</v-app-bar-title
     >
-  </v-toolbar>
+  </v-app-bar>
   <v-responsive class="d-flex align-center text-center fill-height">
-    <OpenaiForm />
-    <ProcessVisualizer />
+    <OpenaiForm @key-provided="displayAvailableModels" />
+    <ProcessVisualizer :available-models="availableModels" />
   </v-responsive>
 </template>
 
-<script setup>
+<script>
 import ProcessVisualizer from "@/components/ProcessVisualizer.vue";
 import OpenaiForm from "@/components/OpenaiForm.vue";
+
+export default {
+  components: {
+    ProcessVisualizer,
+    OpenaiForm,
+  },
+  data() {
+    return {
+      availableModels: [],
+    };
+  },
+  methods: {
+    displayAvailableModels(availableModels) {
+      this.availableModels = availableModels;
+    },
+  },
+};
 </script>

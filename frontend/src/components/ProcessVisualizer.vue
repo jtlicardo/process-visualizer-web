@@ -1,4 +1,12 @@
 <template>
+  <v-container>
+    <p class="my-6"><b>OpenAI model to use</b></p>
+    <v-select
+      v-model="selectedModel"
+      label="Select"
+      :items="availableModels"
+    ></v-select>
+  </v-container>
   <v-container class="fill-height">
     <v-responsive class="d-flex align-center text-center fill-height">
       <v-container>
@@ -41,8 +49,16 @@
 import axios from "axios";
 
 export default {
+  props: {
+    availableModels: {
+      type: Array,
+      required: true,
+      default: () => [],
+    },
+  },
   data() {
     return {
+      selectedModel: null,
       processDescription: "",
       loading: false,
       imageCreated: null,
@@ -90,6 +106,10 @@ export default {
       }
     },
     async sendProcessDescription() {
+      if (!this.selectedModel) {
+        alert("Please select a model");
+        return;
+      }
       this.imageCreated = false;
       this.loading = true;
       try {

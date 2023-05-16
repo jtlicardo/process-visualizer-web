@@ -1,6 +1,6 @@
 <template>
-  <v-container>
-    <div class="background" v-if="!keyProvided">
+  <v-container v-if="!keyProvided">
+    <div class="background">
       <p class="mb-6">
         To use this app, please provide your <b>OpenAI API key</b>. <br />
         Your key will be used exclusively for the intended purposes of this app.
@@ -28,10 +28,6 @@
       </v-container>
     </div>
   </v-container>
-  <v-container>
-    <p class="my-6"><b>OpenAI model to use</b></p>
-    <v-select label="Select" :items="availableModels"></v-select>
-  </v-container>
 </template>
 
 <script>
@@ -48,6 +44,10 @@ export default {
   },
   methods: {
     async submit() {
+      if (!this.apiKey) {
+        alert("Please provide your OpenAI API key");
+        return;
+      }
       this.loading = true;
       try {
         let response = await axios.post(
@@ -62,6 +62,7 @@ export default {
         console.log(response);
         this.keyProvided = true;
         this.availableModels = response.data.available_models;
+        this.$emit("key-provided", this.availableModels);
         alert("Key submitted successfully");
       } catch (e) {
         if (e.response.status === 401) {
