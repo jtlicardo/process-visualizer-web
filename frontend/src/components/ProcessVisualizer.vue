@@ -22,6 +22,7 @@
         :disabled="loading"
         color="grey-lighten-4"
         @click="sendProcessDescription"
+        class="mb-2"
       >
         Submit
       </v-btn>
