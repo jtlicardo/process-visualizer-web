@@ -12,5 +12,7 @@ services:
       - 3000:3000
     volumes:
       - image-data:/app/public/generated_images
+      - ./frontend:/app
+      - /app/node_modules
 volumes:
   image-data:
