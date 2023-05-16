@@ -16,7 +16,14 @@
       </v-container>
     </v-form>
     <v-container>
-      <v-btn class="mb-4" color="black" @click="submit">Submit key</v-btn>
+      <v-btn
+        class="mb-4"
+        color="black"
+        @click="submit"
+        :loading="loading"
+        :disabled="loading"
+        >Submit key</v-btn
+      >
     </v-container>
   </div>
 </template>
@@ -29,10 +36,13 @@ export default {
     return {
       apiKey: "",
       keyProvided: false,
+      loading: false,
+      availableModels: [],
     };
   },
   methods: {
     async submit() {
+      this.loading = true;
       try {
         let response = await axios.post(
           "http://localhost:5000/key",
@@ -45,9 +55,16 @@ export default {
         );
         console.log(response);
         this.keyProvided = true;
+        alert("Key submitted successfully");
       } catch (e) {
+        if (e.response.status === 401) {
+          alert("Invalid OpenAI key");
+        } else {
+          alert("Something went wrong");
+        }
         console.log(e);
       }
+      this.loading = false;
     },
   },
 };
