@@ -3,8 +3,6 @@ from os.path import exists
 
 import graphviz
 
-from logging_utils import write_to_file
-
 
 class GraphGenerator:
     def __init__(self, data, format=None, notebook=False, test_mode=False):
@@ -406,7 +404,7 @@ class GraphGenerator:
                         f"{parent_gateway['id']}_S",
                         element["content"]["go_to"],
                         label_parameter=element["content"]["condition"]["word"],
-                        weight="0"
+                        weight="0",
                     )
             elif element["type"] == "exclusive":
                 self.handle_gateway(
@@ -568,8 +566,6 @@ class GraphGenerator:
         self.create_start_and_end_events()
         self.clean_up_graph()
 
-        write_to_file("graph_data.json", self.tracker)
-
     def remove_old_files(self):
         if exists("bpmn.gv"):
             remove("bpmn.gv")
@@ -589,16 +585,4 @@ class GraphGenerator:
             src.render(file, view=True)
 
     def save_file(self):
-        self.bpmn.render(outfile="./src/bpmn.jpeg")
-
-
-if __name__ == "__main__":
-    # Used for testing
-    import json
-
-    with open("output_logs/bpmn_structure/bpmn_structure.json", "r") as file:
-        content = file.read()
-    data = json.loads(content)
-    bpmn = GraphGenerator(data, notebook=False)
-    bpmn.generate_graph()
-    bpmn.show()
+        self.bpmn.render(outfile="./image_data/bpmn.jpeg")

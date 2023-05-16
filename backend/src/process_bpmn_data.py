@@ -10,7 +10,6 @@ import openai_prompts as prompts
 from coreference_resolution.coref import resolve_references
 from create_bpmn_structure import create_bpmn_structure
 from graph_generator import GraphGenerator
-from logging_utils import clear_folder, write_to_file
 
 BPMN_INFORMATION_EXTRACTION_ENDPOINT = "https://api-inference.huggingface.co/models/jtlicardo/bpmn-information-extraction-v2"
 ZERO_SHOT_CLASSIFICATION_ENDPOINT = (
@@ -52,7 +51,6 @@ def create_sentence_data(text: str) -> list[dict]:
         sentence_data.append({"sentence": sent, "start": start, "end": end})
         start += len(sent) + 1
 
-    write_to_file("sentence_data.json", sentence_data)
     return sentence_data
 
 
@@ -84,7 +82,6 @@ def extract_bpmn_data(text: str) -> list[dict]:
         {"inputs": text, "options": {"wait_for_model": True}},
         BPMN_INFORMATION_EXTRACTION_ENDPOINT,
     )
-    write_to_file("model_output.json", data)
 
     if "error" in data:
         print(
@@ -128,9 +125,6 @@ def fix_bpmn_data(data: list[dict]) -> list[dict]:
             data[i]["end"] = data[i + 1]["end"]
             data[i]["score"] = max(data[i]["score"], data[i + 1]["score"])
             data.pop(i + 1)
-
-    if data != data_copy:
-        write_to_file("model_output_fixed.json", data)
 
     return data
 
@@ -1072,14 +1066,9 @@ def process_text(text: str) -> list[dict]:
         list: the list of dictionaries representing the BPMN structure
     """
 
-    clear_folder("./output_logs")
-
-    print("\nInput text:\n" + text + "\n")
-
     if should_resolve_coreferences(text):
         print("Resolving coreferences...\n")
         text = resolve_references(text)
-        write_to_file("coref_output.txt", text)
     else:
         print("No coreferences to resolve\n")
 
@@ -1098,19 +1087,15 @@ def process_text(text: str) -> list[dict]:
 
     agent_task_pairs = create_agent_task_pairs(agents, tasks, sents_data)
 
-    write_to_file("agent_task_pairs_initial.json", agent_task_pairs)
-
     if has_parallel_keywords(text):
         parallel_gateway_data = handle_text_with_parallel_keywords(
             text, agent_task_pairs, sents_data
         )
-        write_to_file("parallel_gateway_data.json", parallel_gateway_data)
 
     if len(conditions) > 0:
         agent_task_pairs, exclusive_gateway_data = handle_text_with_conditions(
             agent_task_pairs, conditions, sents_data, text
         )
-        write_to_file("exclusive_gateway_data.json", exclusive_gateway_data)
 
     if len(process_info) > 0:
         process_info = batch_classify_process_info(process_info)
@@ -1118,34 +1103,15 @@ def process_text(text: str) -> list[dict]:
             agent_task_pairs, sents_data, process_info
         )
 
-    write_to_file("process_info_entities.json", process_info)
-
     loop_sentences = find_sentences_with_loop_keywords(sents_data)
     agent_task_pairs = add_task_ids(agent_task_pairs, sents_data, loop_sentences)
     agent_task_pairs = add_loops(agent_task_pairs, sents_data, loop_sentences)
-
-    write_to_file("agent_task_pairs_final.json", agent_task_pairs)
 
     structure = create_bpmn_structure(
         agent_task_pairs, parallel_gateway_data, exclusive_gateway_data, process_info
     )
 
-    write_to_file("bpmn_structure.json", structure)
-
     return structure
-
-
-def generate_graph_pdf(input: list[dict], notebook: bool) -> None:
-    """
-    Generates a graph of the BPMN structure and saves it as a PDF.
-    Args:
-        input (list): the list of dictionaries representing the BPMN structure
-        notebook (bool): whether the graph is being generated in a Jupyter notebook
-    """
-    bpmn = GraphGenerator(input, notebook=notebook)
-    print("Generating graph...\n")
-    bpmn.generate_graph()
-    bpmn.show()
 
 
 def generate_graph_image(input: list[dict]) -> None:

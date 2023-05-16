@@ -4,9 +4,13 @@ services:
     build: ./backend
     ports:
       - 5000:5000
+    volumes:
+      - image-data:/app/image_data
   vue-frontend:
     build: ./frontend
     ports:
       - 3000:3000
     volumes:
-      - ./frontend/src/assets:/app/src/assets
+      - image-data:/app/public/generated_images
+volumes:
+  image-data:

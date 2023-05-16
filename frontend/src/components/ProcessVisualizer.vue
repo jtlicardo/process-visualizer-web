@@ -25,12 +25,8 @@
       >
         Submit
       </v-btn>
-      <div v-if="imageUrl">
-        <v-img
-          :src="imageUrl"
-          :width="imageWidth"
-          class="my-14 mx-auto"
-        ></v-img>
+      <div v-if="imageCreated">
+        <v-img :src="imageUrl" class="my-14 mx-auto"></v-img>
       </div>
     </v-responsive>
   </v-container>
@@ -42,13 +38,22 @@ import axios from "axios";
 export default {
   data() {
     return {
-      loading: false,
-      imageUrl: null,
-      imageWidth: 0,
       processDescription: "",
+      loading: false,
+      imageCreated: null,
+      imageCreatedTimestamp: 0,
     };
   },
+  computed: {
+    imageUrl() {
+      return `/generated_images/bpmn.jpeg?timestamp=${this.imageCreatedTimestamp}`;
+    },
+  },
   methods: {
+    onImageCreated() {
+      this.imageCreated = true;
+      this.imageCreatedTimestamp = Date.now();
+    },
     loadExample(num) {
       if (num === 1) {
         this.processDescription =
@@ -74,14 +79,25 @@ export default {
       }
     },
     async sendProcessDescription() {
-      this.imageUrl = null;
+      this.imageCreated = false;
       this.loading = true;
-      const path = "http://localhost:5000/text";
-      let postData = {
-        text: this.processDescription,
-      };
       try {
-      } catch (e) {}
+        let response = await axios.post(
+          "http://localhost:5000/text",
+          JSON.stringify({
+            text: this.processDescription,
+          }),
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        console.log(response);
+        this.onImageCreated();
+      } catch (e) {
+        console.log(e);
+      }
       this.loading = false;
     },
   },

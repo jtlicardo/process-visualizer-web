@@ -1,6 +1,3 @@
-from logging_utils import write_to_file
-
-
 def create_bpmn_structure(
     agent_task_pairs: list[dict],
     parallel_gateway_data: list[dict],
@@ -28,16 +25,10 @@ def create_bpmn_structure(
 
     add_tasks_to_gateways(agent_task_pairs_to_add, gateways, process_info)
 
-    write_to_file("bpmn_structure/gateways.json", gateways)
-
     nested_gateways = nest_gateways(gateways)
-
-    write_to_file("bpmn_structure/nested_gateways.json", nested_gateways)
 
     structure = agent_task_pairs_to_add + nested_gateways
     structure = sorted(structure, key=lambda x: get_start_idx(x))
-
-    write_to_file("bpmn_structure/bpmn_structure.json", structure)
 
     return structure
 
