@@ -3,16 +3,19 @@ services:
   flask-backend:
     build: ./backend
     ports:
-      - 5000:5000
+      - 5000:8000
     volumes:
-      - image-data:/app/image_data
+      - ./frontend/src/assets/generated_images:/app/image_data
+    depends_on:
+      - redis
   vue-frontend:
     build: ./frontend
     ports:
       - 3000:3000
     volumes:
-      - image-data:/app/public/generated_images
       - ./frontend:/app
       - /app/node_modules
-volumes:
-  image-data:
+  redis:
+    image: redis
+    ports:
+      - 6379:6379

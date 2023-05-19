@@ -17,4 +17,9 @@ COPY . .
 
 EXPOSE 5000
 
-CMD ["python", "src/server.py"]
+CMD ["gunicorn", \
+"--chdir", "src", \
+"server:app", \
+"--worker-class", "gevent", \
+"--workers", "1", \
+"--bind", "0.0.0.0:8000"]

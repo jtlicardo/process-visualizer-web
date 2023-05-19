@@ -585,4 +585,4 @@ class GraphGenerator:
             src.render(file, view=True)
 
     def save_file(self):
-        self.bpmn.render(outfile="./image_data/bpmn.jpeg")
+        self.bpmn.render(outfile="../image_data/bpmn.jpeg")

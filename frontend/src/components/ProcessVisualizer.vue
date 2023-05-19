@@ -34,6 +34,7 @@
       >
         Submit
       </v-btn>
+      <p>{{ currentStatus }}</p>
       <div v-if="imageCreated">
         <v-img
           :src="imageUrl"
@@ -62,24 +63,23 @@ export default {
       processDescription: "",
       loading: false,
       imageCreated: null,
-      imageCreatedTimestamp: 0,
       imageWidth: 0,
+      currentStatus: "",
+      imageUrl: null,
     };
-  },
-  computed: {
-    imageUrl() {
-      return `/generated_images/bpmn.jpeg?timestamp=${this.imageCreatedTimestamp}`;
-    },
   },
   methods: {
     onImageCreated() {
-      this.imageCreated = true;
-      this.imageCreatedTimestamp = Date.now();
+      this.imageUrl = new URL(
+        "../assets/generated_images/bpmn.jpeg",
+        import.meta.url
+      ).href;
       const img = new Image();
       img.src = this.imageUrl;
       img.onload = () => {
         this.imageWidth = img.width;
       };
+      this.imageCreated = true;
     },
     loadExample(num) {
       if (num === 1) {
@@ -105,6 +105,14 @@ export default {
           "After the student has done that, the professor updates the database.";
       }
     },
+    initializeEventSource() {
+      console.log("Initializing event source");
+      const eventSource = new EventSource("http://localhost:5000/stream");
+      eventSource.onmessage = (event) => {
+        var data = JSON.parse(event.data);
+        this.currentStatus = data.message;
+      };
+    },
     async sendProcessDescription() {
       if (!this.selectedModel) {
         alert("Please select a model");
@@ -113,6 +121,8 @@ export default {
       this.imageCreated = false;
       this.loading = true;
       try {
+        this.currentStatus = "Starting process...";
+        this.initializeEventSource();
         let response = await axios.post(
           "http://localhost:5000/text",
           JSON.stringify({

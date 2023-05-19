@@ -1,15 +1,96 @@
-import os
-
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from flask_sse import sse
 import openai
 
-from process_bpmn_data import generate_graph_image, process_text
+from coreference_resolution.coref import resolve_references
+from create_bpmn_structure import create_bpmn_structure
+from process_bpmn_data import (
+    generate_graph_image,
+    should_resolve_coreferences,
+    extract_bpmn_data,
+    fix_bpmn_data,
+    extract_all_entities,
+    create_sentence_data,
+    create_agent_task_pairs,
+    has_parallel_keywords,
+    handle_text_with_parallel_keywords,
+    handle_text_with_conditions,
+    batch_classify_process_info,
+    add_process_end_events,
+    find_sentences_with_loop_keywords,
+    add_task_ids,
+    add_loops,
+)
 
 app = Flask(__name__)
 app.config.from_object(__name__)
+app.config["REDIS_URL"] = "redis://redis:6379"
+app.register_blueprint(sse, url_prefix="/stream")
 
 CORS(app, resources={r"/*": {"origins": "*"}})
+
+
+def process_text(text: str) -> list[dict]:
+
+    if should_resolve_coreferences(text):
+        sse.publish({"message": "Resolving coreferences..."}, type="message")
+        text = resolve_references(text)
+    else:
+        sse.publish({"message": "No coreferences to resolve"}, type="message")
+
+    sse.publish({"message": "Extracting BPMN data..."}, type="message")
+
+    data = extract_bpmn_data(text)
+
+    if not data:
+        return
+
+    data = fix_bpmn_data(data)
+
+    sse.publish({"message": "Extracting entities..."}, type="message")
+
+    agents, tasks, conditions, process_info = extract_all_entities(data, 0.6)
+    parallel_gateway_data = []
+    exclusive_gateway_data = []
+
+    sse.publish({"message": "Creating agent-task pairs..."}, type="message")
+
+    sents_data = create_sentence_data(text)
+
+    agent_task_pairs = create_agent_task_pairs(agents, tasks, sents_data)
+
+    if has_parallel_keywords(text):
+        sse.publish({"message": "Handling parallel gateways..."}, type="message")
+        parallel_gateway_data = handle_text_with_parallel_keywords(
+            text, agent_task_pairs, sents_data
+        )
+
+    if len(conditions) > 0:
+        sse.publish({"message": "Handling exclusive gateways..."}, type="message")
+        agent_task_pairs, exclusive_gateway_data = handle_text_with_conditions(
+            agent_task_pairs, conditions, sents_data, text
+        )
+
+    if len(process_info) > 0:
+        process_info = batch_classify_process_info(process_info)
+        agent_task_pairs = add_process_end_events(
+            agent_task_pairs, sents_data, process_info
+        )
+
+    sse.publish({"message": "Adding task IDs..."}, type="message")
+
+    loop_sentences = find_sentences_with_loop_keywords(sents_data)
+    agent_task_pairs = add_task_ids(agent_task_pairs, sents_data, loop_sentences)
+    agent_task_pairs = add_loops(agent_task_pairs, sents_data, loop_sentences)
+
+    sse.publish({"message": "Creating BPMN structure..."}, type="message")
+
+    structure = create_bpmn_structure(
+        agent_task_pairs, parallel_gateway_data, exclusive_gateway_data, process_info
+    )
+
+    return structure
 
 
 @app.route("/key", methods=["POST"])
@@ -37,8 +118,8 @@ def receive_api_key():
 def receive_text_input():
     data = request.get_json()
     text = data["text"]
-    print(text)
     output = process_text(text)
+    sse.publish({"message": "Generating graph image..."}, type="message")
     generate_graph_image(output)
     return jsonify({"message": "success"}), 200
 

@@ -7,8 +7,7 @@ from spacy.matcher import Matcher
 from thefuzz import fuzz
 
 import openai_prompts as prompts
-from coreference_resolution.coref import resolve_references
-from create_bpmn_structure import create_bpmn_structure
+
 from graph_generator import GraphGenerator
 
 BPMN_INFORMATION_EXTRACTION_ENDPOINT = "https://api-inference.huggingface.co/models/jtlicardo/bpmn-information-extraction-v2"
@@ -77,17 +76,10 @@ def extract_bpmn_data(text: str) -> list[dict]:
         list: model output
     """
 
-    print("Extracting BPMN data...\n")
     data = query(
         {"inputs": text, "options": {"wait_for_model": True}},
         BPMN_INFORMATION_EXTRACTION_ENDPOINT,
     )
-
-    if "error" in data:
-        print(
-            f"{Fore.RED}Error when extracting BPMN data: {data['error']}{Fore.RESET}\n"
-        )
-        return None
 
     return data
 
@@ -110,14 +102,6 @@ def fix_bpmn_data(data: list[dict]) -> list[dict]:
             and data_copy[i + 1]["entity_group"] == "TASK"
             and data_copy[i]["end"] == data_copy[i + 1]["start"]
         ):
-            print("Fixing BPMN data...")
-            print(
-                "Combining",
-                data_copy[i]["word"],
-                "and",
-                data_copy[i + 1]["word"],
-                "into one entity\n",
-            )
             if data_copy[i + 1]["word"].startswith("##"):
                 data[i]["word"] = data[i]["word"] + data[i + 1]["word"][2:]
             else:
@@ -156,12 +140,6 @@ def classify_process_info(text: str) -> dict:
         ZERO_SHOT_CLASSIFICATION_ENDPOINT,
     )
 
-    if "error" in data:
-        print(
-            f"{Fore.RED}Error when classifying PROCESS_INFO entity: {data['error']}{Fore.RESET}\n"
-        )
-        return None
-
     return data
 
 
@@ -175,8 +153,6 @@ def batch_classify_process_info(process_info_entities: list[dict]) -> list[dict]
     """
 
     updated_entities = []
-
-    print("Classifying PROCESS_INFO entities...\n")
 
     for entity in process_info_entities:
         text = entity["word"]
@@ -531,7 +507,6 @@ def extract_exclusive_gateways(process_description: str, conditions: list) -> li
     matches = re.findall(pattern, response, re.DOTALL)
     gateways = [s.strip() for s in matches]
     gateway_indices = get_indices(gateways, process_description)
-    print("Exclusive gateway indices:", gateway_indices, "\n")
 
     exclusive_gateways = []
 
@@ -567,7 +542,6 @@ def extract_exclusive_gateways(process_description: str, conditions: list) -> li
     for i, gateway in enumerate(exclusive_gateways):
         if i != len(exclusive_gateways) - 1:
             if gateway["end"] > exclusive_gateways[i + 1]["start"]:
-                print("Nested exclusive gateway found\n")
                 # To the nested gateway, add parent gateway id
                 exclusive_gateways[i + 1]["parent_gateway_id"] = gateway["id"]
 
@@ -650,7 +624,6 @@ def extract_exclusive_gateways(process_description: str, conditions: list) -> li
                         "paths"
                     ].index(path)
 
-    print("Exclusive gateways data:", exclusive_gateways, "\n")
     return exclusive_gateways
 
 
@@ -729,8 +702,6 @@ def extract_all_entities(data: list, min_score: float) -> tuple:
     Returns:
         tuple: a tuple of lists containing the extracted entities
     """
-
-    print("Extracting entities...\n")
     agents = extract_entities("AGENT", data, min_score)
     tasks = extract_entities("TASK", data, min_score)
     conditions = extract_entities("CONDITION", data, min_score)
@@ -799,7 +770,6 @@ def get_parallel_paths(parallel_gateway: str, process_description: str) -> list[
     paths = paths.split("&&")
     paths = [s.strip() for s in paths]
     indices = get_indices(paths, process_description)
-    print("Parallel path indices:", indices, "\n")
     return indices
 
 
@@ -816,7 +786,6 @@ def get_parallel_gateways(text: str) -> list[dict]:
     matches = re.findall(pattern, response, re.DOTALL)
     gateways = [s.strip() for s in matches]
     indices = get_indices(gateways, text)
-    print("Parallel gateway indices:", indices, "\n")
     return indices
 
 
@@ -866,8 +835,6 @@ def handle_text_with_parallel_keywords(
         assert num_of_atp != 0, "No agent-task pairs found in parallel gateway"
 
         if num_of_sentences == 1 and num_of_atp == 1:
-            print("Parallel gateway is a single sentence and single agent-task pair\n")
-
             sentence_text = get_sentence_text(sents_data, indices)
             assert sentence_text is not None
             response = prompts.extract_parallel_tasks(sentence_text)
@@ -931,7 +898,6 @@ def handle_text_with_parallel_keywords(
         for path in gateway["paths"]:
             path_text = process_description[path["start"] : path["end"]]
             if has_parallel_keywords(path_text):
-                print("Parallel keywords detected in path:", path_text, "\n")
                 indices = get_parallel_paths(path_text, process_description)
                 gateway = {
                     "id": f"PG{parallel_gateway_id}",
@@ -943,8 +909,6 @@ def handle_text_with_parallel_keywords(
                 }
                 parallel_gateway_id += 1
                 parallel_gateways.append(gateway)
-
-    print("Parallel gateway data:", parallel_gateways, "\n")
 
     return parallel_gateways
 
@@ -1057,63 +1021,6 @@ def extract_tasks(model_response: str) -> list[str]:
     return tasks
 
 
-def process_text(text: str) -> list[dict]:
-    """
-    Processes the text to create the BPMN structure (a list of dictionaries).
-    Args:
-        text (str): the text of the process description
-    Returns:
-        list: the list of dictionaries representing the BPMN structure
-    """
-
-    if should_resolve_coreferences(text):
-        print("Resolving coreferences...\n")
-        text = resolve_references(text)
-    else:
-        print("No coreferences to resolve\n")
-
-    data = extract_bpmn_data(text)
-
-    if not data:
-        return
-
-    data = fix_bpmn_data(data)
-
-    agents, tasks, conditions, process_info = extract_all_entities(data, 0.6)
-    parallel_gateway_data = []
-    exclusive_gateway_data = []
-
-    sents_data = create_sentence_data(text)
-
-    agent_task_pairs = create_agent_task_pairs(agents, tasks, sents_data)
-
-    if has_parallel_keywords(text):
-        parallel_gateway_data = handle_text_with_parallel_keywords(
-            text, agent_task_pairs, sents_data
-        )
-
-    if len(conditions) > 0:
-        agent_task_pairs, exclusive_gateway_data = handle_text_with_conditions(
-            agent_task_pairs, conditions, sents_data, text
-        )
-
-    if len(process_info) > 0:
-        process_info = batch_classify_process_info(process_info)
-        agent_task_pairs = add_process_end_events(
-            agent_task_pairs, sents_data, process_info
-        )
-
-    loop_sentences = find_sentences_with_loop_keywords(sents_data)
-    agent_task_pairs = add_task_ids(agent_task_pairs, sents_data, loop_sentences)
-    agent_task_pairs = add_loops(agent_task_pairs, sents_data, loop_sentences)
-
-    structure = create_bpmn_structure(
-        agent_task_pairs, parallel_gateway_data, exclusive_gateway_data, process_info
-    )
-
-    return structure
-
-
 def generate_graph_image(input: list[dict]) -> None:
     """
     Generates a graph of the BPMN structure and saves it as an image.
@@ -1121,6 +1028,5 @@ def generate_graph_image(input: list[dict]) -> None:
         input (list): the list of dictionaries representing the BPMN structure
     """
     bpmn = GraphGenerator(input, format="jpeg", notebook=False)
-    print("Generating graph...\n")
     bpmn.generate_graph()
     bpmn.save_file()
