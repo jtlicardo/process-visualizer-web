@@ -1,3 +1,5 @@
+import configparser
+
 import openai
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -114,10 +116,22 @@ def receive_api_key():
     )
 
 
+def configure_openai_model(model):
+    config = configparser.ConfigParser()
+    config.read("src\config.ini")
+    config["OPENAI"] = {}
+    config["OPENAI"]["model"] = model
+    with open("src\config.ini", "w") as configfile:
+        config.write(configfile)
+    sse.publish({"message": f"Using OpenAI model: {model}"}, type="message")
+
+
 @app.route("/text", methods=["POST"])
 def receive_text_input():
     data = request.get_json()
     text = data["text"]
+    model = data["model"]
+    configure_openai_model(model)
     output = process_text(text)
     sse.publish({"message": "Generating graph image..."}, type="message")
     generate_graph_image(output)

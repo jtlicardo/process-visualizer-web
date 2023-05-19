@@ -24,21 +24,6 @@ def process_text(text):
     return (doc1, doc2)
 
 
-def read_file(file_path):
-    """
-    Reads a file and returns a list of strings, where each string is a line in the file.
-    Args:
-        file_path (str): Path to the file.
-    Returns:
-        (list): List of strings.
-    """
-
-    with open(file_path, "r") as f:
-        lines = [line.strip() for line in f]
-
-    return lines
-
-
 # Adapted from: https://gist.github.com/thomashacker/b5dd6042c092e0a22c2b9243a64a2466
 def resolve_references(text: str, print_clusters: bool = False) -> str:
     """
@@ -71,7 +56,24 @@ def resolve_references(text: str, print_clusters: bool = False) -> str:
                 clusters.remove(cluster)
                 break
 
-    ignore_words = read_file("src/coreference_resolution/ignore_words.txt")
+    ignore_words = [
+        "my",
+        "mine",
+        "his",
+        "her",
+        "hers",
+        "its",
+        "their",
+        "theirs",
+        "ours",
+        "our",
+        "your",
+        "yours",
+        "this",
+        "that",
+        "these",
+        "those",
+    ]
 
     new_clusters = []
     for i, cluster in enumerate(clusters):

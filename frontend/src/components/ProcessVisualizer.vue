@@ -125,6 +125,7 @@ export default {
           "http://localhost:5000/text",
           JSON.stringify({
             text: this.processDescription,
+            model: this.selectedModel,
           }),
           {
             headers: {
