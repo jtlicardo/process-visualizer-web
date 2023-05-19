@@ -84,25 +84,23 @@ export default {
     loadExample(num) {
       if (num === 1) {
         this.processDescription =
-          "The customer fills out a loan application. Meanwhile, the manager decides " +
-          "whether to prepare additional questions. If yes, the manager prepares additional questions. If the " +
-          "decision is not to prepare, the manager waits for the customer. After all those activities are finished, " +
-          "the customer sends the application.";
+          "The process begins when the student logs in to the university's website. He then takes an online exam. After that, " +
+          "the system grades it. If the student scores below 60%, he takes the exam again. If the student scores 60% or higher " +
+          "on the exam, the professor enters the grade.";
       } else if (num === 2) {
         this.processDescription =
-          "The first step is for the student to register for the exam through the university's " +
-          "online portal. Once registered, he will receive an email confirming their registration. Next, he will need to " +
-          "arrive at the exam location on the day of the exam. Before entering the exam room, the student will be required " +
-          "to check in with an exam administrator. Once inside the exam room, the student will take the exam. Once the exam " +
-          "time is up, the student will need to submit their completed exam. He will then be allowed to leave the exam room. " +
-          "After the exam, the professor will grade the exams. The students will receive their exam results at a later date.";
+          "The customer decides if he wants to finance or pay in cash. If the customer chooses to finance, " +
+          "the customer will need to fill out a loan application. After that, the customer sends the application to the bank. If the " +
+          "customer chooses to pay in cash, the customer will need to bring the total cost of the car to the dealership in order to " +
+          "complete the transaction. After the customer has chosen to finance or pay in cash, the customer must sign the contract before " +
+          "the transaction is completed.";
       } else if (num === 3) {
         this.processDescription =
-          "The process begins with the student choosing his preferences. The professor then saves " +
-          "the preferences to a database. He then allocates the student. After that, he informs the employer and the student " +
-          "about the allocation. The employer evaluates the candidate. If the student is not accepted, the employer informs the " +
-          "student. Ater that the student chooses his preferences again. If the student is accepted, he completes the internship. " +
-          "After the student has done that, the professor updates the database.";
+          "The process starts when the R&D team generates ideas for new products. At this point, 3 things occur in " +
+          "parallel: the first thing is the engineering team analyzing the ideas for feasibility. The engineering team also creates the technical " +
+          "specification. The second path involves the marketing team conducting market research for the ideas. At the same time, the design team " +
+          "creates visual concepts for the potential products. The third path sees the financial analysts reviewing the potential cost of the ideas. " +
+          "Once each track has completed its analysis, the management reviews the findings of the analysis.";
       }
     },
     initializeEventSource() {
