@@ -1,26 +1,26 @@
+import openai
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_sse import sse
-import openai
 
 from coreference_resolution.coref import resolve_references
 from create_bpmn_structure import create_bpmn_structure
 from process_bpmn_data import (
-    generate_graph_image,
-    should_resolve_coreferences,
-    extract_bpmn_data,
-    fix_bpmn_data,
-    extract_all_entities,
-    create_sentence_data,
-    create_agent_task_pairs,
-    has_parallel_keywords,
-    handle_text_with_parallel_keywords,
-    handle_text_with_conditions,
-    batch_classify_process_info,
-    add_process_end_events,
-    find_sentences_with_loop_keywords,
-    add_task_ids,
     add_loops,
+    add_process_end_events,
+    add_task_ids,
+    batch_classify_process_info,
+    create_agent_task_pairs,
+    create_sentence_data,
+    extract_all_entities,
+    extract_bpmn_data,
+    find_sentences_with_loop_keywords,
+    fix_bpmn_data,
+    generate_graph_image,
+    handle_text_with_conditions,
+    handle_text_with_parallel_keywords,
+    has_parallel_keywords,
+    should_resolve_coreferences,
 )
 
 app = Flask(__name__)

@@ -1,4 +1,4 @@
-from os import remove
+from os import listdir, remove
 from os.path import exists
 
 import graphviz
@@ -585,4 +585,6 @@ class GraphGenerator:
             src.render(file, view=True)
 
     def save_file(self):
+        for file in listdir("../image_data"):
+            remove(f"../image_data/{file}")
         self.bpmn.render(outfile="../image_data/bpmn.jpeg")

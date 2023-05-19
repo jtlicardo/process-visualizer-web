@@ -7,7 +7,6 @@ from spacy.matcher import Matcher
 from thefuzz import fuzz
 
 import openai_prompts as prompts
-
 from graph_generator import GraphGenerator
 
 BPMN_INFORMATION_EXTRACTION_ENDPOINT = "https://api-inference.huggingface.co/models/jtlicardo/bpmn-information-extraction-v2"
