@@ -2,8 +2,7 @@
   <v-container v-if="!keyProvided">
     <div class="background">
       <p class="mb-6">
-        To use this app, please provide your <b>OpenAI API key</b>. <br />
-        Your key will be used exclusively for the intended purposes of this app.
+        To use this app, please provide your <b>OpenAI API key</b>.
       </p>
       <v-form v-model="valid">
         <v-container>
