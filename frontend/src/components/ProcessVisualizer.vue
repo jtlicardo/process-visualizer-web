@@ -111,9 +111,19 @@ export default {
         this.currentStatus = data.message;
       };
     },
-    async sendProcessDescription() {
+    validate() {
       if (!this.selectedModel) {
         alert("Please select a model");
+        return false;
+      }
+      if (this.processDescription === "") {
+        alert("Please enter a process description");
+        return false;
+      }
+      return true;
+    },
+    async sendProcessDescription() {
+      if (!this.validate()) {
         return;
       }
       this.imageCreated = false;
@@ -133,6 +143,10 @@ export default {
             },
           }
         );
+        if (response.status === 500) {
+          alert("An error occurred while processing your request.");
+          return;
+        }
         console.log(response);
         this.onImageCreated();
       } catch (e) {

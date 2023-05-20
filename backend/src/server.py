@@ -38,16 +38,10 @@ def process_text(text: str) -> list[dict]:
     if should_resolve_coreferences(text):
         sse.publish({"message": "Resolving coreferences..."}, type="message")
         text = resolve_references(text)
-    else:
-        sse.publish({"message": "No coreferences to resolve"}, type="message")
 
     sse.publish({"message": "Extracting BPMN data..."}, type="message")
 
     data = extract_bpmn_data(text)
-
-    if not data:
-        return
-
     data = fix_bpmn_data(data)
 
     sse.publish({"message": "Extracting entities..."}, type="message")
@@ -59,7 +53,6 @@ def process_text(text: str) -> list[dict]:
     sse.publish({"message": "Creating agent-task pairs..."}, type="message")
 
     sents_data = create_sentence_data(text)
-
     agent_task_pairs = create_agent_task_pairs(agents, tasks, sents_data)
 
     if has_parallel_keywords(text):
@@ -91,6 +84,8 @@ def process_text(text: str) -> list[dict]:
     structure = create_bpmn_structure(
         agent_task_pairs, parallel_gateway_data, exclusive_gateway_data, process_info
     )
+
+    sse.publish({"message": "Generating graph image..."}, type="message")
 
     return structure
 
@@ -132,10 +127,12 @@ def receive_text_input():
     text = data["text"]
     model = data["model"]
     configure_openai_model(model)
-    output = process_text(text)
-    sse.publish({"message": "Generating graph image..."}, type="message")
-    generate_graph_image(output)
-    return jsonify({"message": "success"}), 200
+    try:
+        output = process_text(text)
+        generate_graph_image(output)
+    except:
+        return jsonify({"message": "Internal server error"}), 500
+    return jsonify({"message": "Success"}), 200
 
 
 if __name__ == "__main__":
